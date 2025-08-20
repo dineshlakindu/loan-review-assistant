@@ -1,0 +1,19 @@
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# app/runtime
+data/decisions_log.csv
+*.log
+
+# env & local
+.env
+.env.local
+*.sqlite
+
+# os noise
+.DS_Store
+Thumbs.db
+
+venv/
