@@ -549,18 +549,33 @@ def review_and_explain_autofill(p: PartialApplication):
     log_decision(full, res)
     return res
 
-# ---------- LangGraph agent router ----------
-from api.engine.agent_graph import run_review_with_graph
+# ---------- LangGraph agent router (optional) ----------
 graph_router = APIRouter(prefix="/graph", tags=["Agent (LangGraph)"])
 
-@graph_router.post("/review", summary="Run loan review via LangGraph agent")
-def review_via_graph(app_data: LoanApplication):
-    result = run_review_with_graph(app_data.model_dump())
-    # ensure decisions_log.csv gets a row even with LangGraph ON
-    try:
-        log_decision(app_data, result)
-    except Exception:
-        pass
-    return result
+try:
+    # Try to import the graph runner. If not available (e.g. in CI), keep the API alive with a stub.
+    from api.engine.agent_graph import run_review_with_graph  # type: ignore
 
-app.include_router(graph_router)
+    @graph_router.post("/review", summary="Run loan review via LangGraph agent")
+    def review_via_graph(app_data: LoanApplication):
+        result = run_review_with_graph(app_data.model_dump())
+        # ensure decisions_log.csv gets a row even with LangGraph ON
+        try:
+            log_decision(app_data, result)
+        except Exception:
+            pass
+        return result
+
+    app.include_router(graph_router)
+
+except Exception:
+    # Provide a stubbed endpoint so the docs still show the route,
+    # but it returns a friendly message in environments without LangGraph.
+    @graph_router.post("/review", summary="(disabled in this build)")
+    def review_via_graph_disabled(app_data: LoanApplication):
+        return {
+            "error": "LangGraph not installed in this environment; route disabled.",
+            "hint": "Install 'langgraph' locally if you want to demo the agent path."
+        }
+
+    app.include_router(graph_router)
