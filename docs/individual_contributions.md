@@ -12,6 +12,6 @@
 - Owns: LLM prompt & LangGraph agent
 - Highlights: `llm_explain_structured`, agent flow
 
-## Student D – <Name / ID>
+## Student D – <Dewmi Yasarathne / s16382>
 - Owns: Data simulation & docs
 - Highlights: mock endpoints, CSV schemas, README/assumptions
